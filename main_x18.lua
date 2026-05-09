@@ -1,6 +1,6 @@
 --[[
-  HeliDash - VBar-style telemetry dashboard for FrSky ETHOS
-  Target: FrSky X20S / X20 Pro, ETHOS 1.6.x
+  HeliDash X18 - VBar-style telemetry dashboard for FrSky ETHOS
+  Target: FrSky X18 / X18S, ETHOS 1.6.x
 
   Install:
     1) Create folder on radio SD: /scripts/helidash/
@@ -17,9 +17,9 @@
       otherwise it is integrated from the configured current source.
 --]]
 
-local APP_NAME = "HeliDash"
-local APP_KEY  = "HDash"
-local VERSION  = "0.1.6"
+local APP_NAME = "HeliDash X18"
+local APP_KEY  = "HD18"
+local VERSION  = "0.2.1-x18"
 
 local REFRESH_HZ = 2
 local MAH_PER_AMP_SECOND = 1000 / 3600
@@ -366,7 +366,10 @@ end
 local function drawBox(x, y, w, h)
   ensureColors()
   setColor(colors.line)
-  lcd.drawRectangle(x, y, w, h)
+  lcd.drawLine(x, y, x + w, y)
+  lcd.drawLine(x, y, x, y + h)
+  lcd.drawLine(x + w, y, x + w, y + h)
+  lcd.drawLine(x, y + h, x + w, y + h)
 end
 
 local function drawMetric(x, y, label, value, unit, big, warn)
@@ -381,13 +384,13 @@ local function drawMetric(x, y, label, value, unit, big, warn)
   end
 
   setColor(warn and colors.warning or colors.value)
-  lcd.drawText(x, y + 24, text, big and FONT_XL or FONT_L)
+  lcd.drawText(x, y + 14, text, FONT_M)
 
   setColor(colors.line)
-  local cx = x - 12
-  local cy = y + 34
-  lcd.drawLine(cx - 6, cy, cx + 6, cy)
-  lcd.drawLine(cx, cy - 6, cx, cy + 6)
+  local cx = x - 8
+  local cy = y + 21
+  lcd.drawLine(cx - 4, cy, cx + 4, cy)
+  lcd.drawLine(cx, cy - 4, cx, cy + 4)
 end
 
 local function create()
@@ -599,23 +602,24 @@ end
 local function paint(widget)
   ensureColors()
 
-  local W, H = lcd.getWindowSize and lcd.getWindowSize() or 800, 480
+  local rawW, rawH = lcd.getWindowSize and lcd.getWindowSize() or 480, 320
 
   if colors.black ~= nil then
     if lcd.clear then
       pcall(function() lcd.clear(colors.black) end)
     elseif lcd.drawFilledRectangle then
       setColor(colors.black)
-      lcd.drawFilledRectangle(0, 0, W, H)
+      lcd.drawFilledRectangle(0, 0, rawW, rawH)
     end
   end
+
+  local W = math.min(rawW, 480)
 
   local voltage = sourceValue(widget.srcVoltage)
   local current = sourceValue(widget.srcCurrent)
   local rpm = sourceValue(widget.srcRpm)
   local escTemp = sourceValue(widget.srcEscTemp)
   local rxV = sourceValue(widget.srcRxVoltage)
-  local livePower = voltage and current and (voltage * current) or nil
   local voltagePct = lipoVoltagePercent(voltage, widget.cellCount)
 
   local title = getModelName(widget)
@@ -628,50 +632,43 @@ local function paint(widget)
   local maxPower = round(widget.maxPower or 0, 1)
   local timer1 = getTimer1Text(widget)
 
-  local borderW = math.floor(W * 0.90)
-  local borderH = math.floor(H * 0.78)
+  local borderW = W - 24
+  local borderH = 220
   local borderX = math.floor((W - borderW) / 2)
-  local borderY = math.floor((H - borderH) / 2)
+  local borderY = 34
 
   drawBox(borderX, borderY, borderW, borderH)
 
-  local col1 = borderX + math.floor(borderW * 0.06)
-  local col2 = borderX + math.floor(borderW * 0.38)
-  local col3 = borderX + math.floor(borderW * 0.70)
+  local col1 = borderX + 24
+  local col2 = borderX + 170
+  local col3 = borderX + 318
 
-  local y = borderY + 18
-  local rowH = math.floor((borderH - 40) / 5)
+  local y = borderY + 7
+  local rowH = 40
 
   drawMetric(col1, y, "Date / Time", os.date("%m.%d.%Y %H:%M"), nil, false)
   drawMetric(col2, y, "Model", title, nil, false)
   drawMetric(col3, y, "Remaining", formatNumber(remaining, 1), "%", true, remaining <= 25)
 
   y = y + rowH
-  drawMetric(col1, y, "Full Capacity", tostring(widget.packCapacity), "mAh", true)
-  drawMetric(col2, y, "Used Capacity", tostring(used), "mAh", true)
-  drawMetric(col3, y, "Empty Voltage", formatNumber(emptyV, 1), "V", true)
+  drawMetric(col1, y, "Capacity", tostring(widget.packCapacity), "mAh", true)
+  drawMetric(col2, y, "Used", tostring(used), "mAh", true)
+  drawMetric(col3, y, "Empty V", formatNumber(emptyV, 1), "V", true)
 
   y = y + rowH
-  drawMetric(col1, y, "Full Voltage", formatNumber(fullV, 1), "V", true)
-  drawMetric(col2, y, "Min Voltage", formatNumber(minV, 1), "V", true)
-  drawMetric(col3, y, "Flight Time", timer1, nil, true)
+  drawMetric(col1, y, "Full V", formatNumber(fullV, 1), "V", true)
+  drawMetric(col2, y, "Min V", formatNumber(minV, 1), "V", true)
+  drawMetric(col3, y, "Flight", timer1, nil, true)
 
   y = y + rowH
-  drawMetric(col1, y, "Max Current", formatNumber(maxCur, 1), "A", true)
-  drawMetric(col2, y, "Max Power", formatNumber(maxPower, 1), "W", true)
+  drawMetric(col1, y, "Max A", formatNumber(maxCur, 1), "A", true)
+  drawMetric(col2, y, "Max W", formatNumber(maxPower, 1), "W", true)
   drawMetric(col3, y, "RPM", formatNumber(rpm, 0), "rpm", false)
 
   y = y + rowH
   drawMetric(col1, y, "ESC Temp", formatNumber(escTemp, 0), "C", false)
-  drawMetric(col2, y, "Voltage Percent", formatNumber(voltagePct, 1), "%", false, voltagePct ~= nil and voltagePct <= 70)
-  drawMetric(col3, y, "RX Voltage", formatNumber(rxV, 1), "V", false)
-
-  if livePower ~= nil then
-    setColor(colors.label)
-    lcd.drawText(borderX + borderW - 120, borderY + borderH - 22, "Now", FONT_S)
-    setColor(colors.value)
-    lcd.drawText(borderX + borderW - 82, borderY + borderH - 22, formatNumber(livePower, 0) .. " W", FONT_S)
-  end
+  drawMetric(col2, y, "Volt %", formatNumber(voltagePct, 1), "%", false, voltagePct ~= nil and voltagePct <= 70)
+  drawMetric(col3, y, "RX V", formatNumber(rxV, 1), "V", false)
 
   resetColor()
 end
