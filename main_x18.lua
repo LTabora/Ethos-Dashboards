@@ -19,7 +19,7 @@
 
 local APP_NAME = "HeliDash X18"
 local APP_KEY  = "HD18"
-local VERSION  = "0.2.1-x18"
+local VERSION  = "0.2.3-x18-frame"
 
 local REFRESH_HZ = 2
 local MAH_PER_AMP_SECOND = 1000 / 3600
