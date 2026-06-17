@@ -17,10 +17,9 @@
       otherwise it is integrated from the configured current source.
 --]]
 
-local APP_NAME = "HDash"
+local APP_NAME = "HeliDash 0.1.10"
 local APP_KEY  = "HDash"
-local DISPLAY_NAME = "HeliDash"
-local VERSION  = "0.1.9"
+local VERSION  = "0.1.10"
 
 local REFRESH_HZ = 2
 local MAH_PER_AMP_SECOND = 1000 / 3600
@@ -657,11 +656,6 @@ local function paint(widget)
   local borderH = H - 44
   local borderX = math.floor((W - borderW) / 2)
   local borderY = 30
-
-  setColor(colors.title)
-  lcd.drawText(borderX, 6, DISPLAY_NAME, FONT_M)
-  setColor(colors.label)
-  lcd.drawText(borderX + 100, 9, VERSION, FONT_S)
 
   drawBox(borderX, borderY, borderW, borderH)
 
