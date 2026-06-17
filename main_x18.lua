@@ -20,7 +20,7 @@
 local APP_NAME = "HDash18"
 local APP_KEY  = "HD18"
 local DISPLAY_NAME = "HeliDash"
-local VERSION  = "0.2.5-x18-frame"
+local VERSION  = "0.2.6-x18-frame"
 
 local REFRESH_HZ = 2
 local MAH_PER_AMP_SECOND = 1000 / 3600
@@ -406,22 +406,16 @@ local function drawMetric(x, y, label, value, unit, big, warn)
 end
 
 local function drawLiveStats(x, y, current, power)
-  local currentText = formatNumber(current, 1)
-  local powerText = formatNumber(power, 0)
-
-  if currentText == nil and powerText == nil then return end
-
-  local text = ""
-  if currentText ~= nil then text = currentText .. " A" end
-  if powerText ~= nil then
-    if text ~= "" then text = text .. " / " end
-    text = text .. powerText .. " W"
-  end
+  local currentText = formatNumber(tonumber(current) or 0, 1) .. " A"
+  local powerText = formatNumber(tonumber(power) or 0, 0) .. " W"
 
   setColor(colors.label)
-  lcd.drawText(x, y, "Now", FONT_XS)
+  lcd.drawText(x, y, "Current", FONT_XS)
+  lcd.drawText(x + 72, y, "Power", FONT_XS)
+
   setColor(colors.value)
-  lcd.drawText(x + 32, y, text, FONT_XS)
+  lcd.drawText(x, y + 10, currentText, FONT_XS)
+  lcd.drawText(x + 72, y + 10, powerText, FONT_XS)
 end
 
 local function create()
@@ -707,7 +701,7 @@ local function paint(widget)
   drawMetric(col2, y, "Volt %", formatNumber(voltagePct, 1), "%", false, voltagePct ~= nil and voltagePct <= 70)
   drawMetric(col3, y, "RX V", formatNumber(rxV, 1), "V", false)
 
-  drawLiveStats(borderX + borderW - 140, borderY + borderH + 7, current, livePower)
+  drawLiveStats(borderX + borderW - 150, borderY + borderH + 4, current, livePower)
 
   resetColor()
 end
