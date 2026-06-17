@@ -17,9 +17,9 @@
       otherwise it is integrated from the configured current source.
 --]]
 
-local APP_NAME = "HeliDash 0.1.10"
+local APP_NAME = "HeliDash 0.1.11"
 local APP_KEY  = "HDash"
-local VERSION  = "0.1.10"
+local VERSION  = "0.1.11"
 
 local REFRESH_HZ = 2
 local MAH_PER_AMP_SECOND = 1000 / 3600
@@ -498,7 +498,7 @@ local function configure(widget)
   local line
 
   line = form.addLine("Model name fallback")
-  form.addTextField(line, nil, 20,
+  form.addTextField(line, nil,
     function() return widget.modelName end,
     function(value) widget.modelName = value end)
 
