@@ -17,9 +17,9 @@
       otherwise it is integrated from the configured current source.
 --]]
 
-local APP_NAME = "HeliDash 0.2.9"
+local APP_NAME = "HeliDash 0.2.10"
 local APP_KEY  = "HD18"
-local VERSION  = "0.2.9-x18-frame"
+local VERSION  = "0.2.10-x18-frame"
 
 local REFRESH_HZ = 2
 local MAH_PER_AMP_SECOND = 1000 / 3600
@@ -696,7 +696,7 @@ local function paint(widget)
   drawMetric(col2, y, "Volt %", formatNumber(voltagePct, 1), "%", false, voltagePct ~= nil and voltagePct <= 70)
   drawMetric(col3, y, "RX V", formatNumber(rxV, 1), "V", false)
 
-  drawLiveStats(borderX + borderW - 150, borderY + borderH - 30, current, livePower)
+  drawLiveStats(borderX + borderW - 164, borderY + borderH - 42, current, livePower)
 
   resetColor()
 end
