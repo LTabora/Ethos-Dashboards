@@ -17,9 +17,9 @@
       otherwise it is integrated from the configured current source.
 --]]
 
-local APP_NAME = "HeliDash 0.2.8"
+local APP_NAME = "HeliDash 0.2.9"
 local APP_KEY  = "HD18"
-local VERSION  = "0.2.8-x18-frame"
+local VERSION  = "0.2.9-x18-frame"
 
 local REFRESH_HZ = 2
 local MAH_PER_AMP_SECOND = 1000 / 3600
@@ -637,7 +637,8 @@ local function paint(widget)
     end
   end
 
-  local W = math.min(rawW, 480)
+  local W = rawW
+  local H = rawH
 
   local voltage = sourceValue(widget.srcVoltage)
   local current = sourceValue(widget.srcCurrent)
@@ -658,18 +659,18 @@ local function paint(widget)
   local timer1 = getTimer1Text(widget)
 
   local borderW = W - 24
-  local borderH = 220
+  local borderH = H - 44
   local borderX = math.floor((W - borderW) / 2)
-  local borderY = 34
+  local borderY = 30
 
   drawBox(borderX, borderY, borderW, borderH)
 
-  local col1 = borderX + 24
-  local col2 = borderX + 170
-  local col3 = borderX + 318
+  local col1 = borderX + math.floor(borderW * 0.06)
+  local col2 = borderX + math.floor(borderW * 0.38)
+  local col3 = borderX + math.floor(borderW * 0.70)
 
-  local y = borderY + 7
-  local rowH = 40
+  local y = borderY + 18
+  local rowH = math.floor((borderH - 40) / 5)
 
   drawMetric(col1, y, "Date / Time", os.date("%m.%d.%Y %H:%M"), nil, false)
   drawMetric(col2, y, "Model", title, nil, false)
@@ -695,7 +696,7 @@ local function paint(widget)
   drawMetric(col2, y, "Volt %", formatNumber(voltagePct, 1), "%", false, voltagePct ~= nil and voltagePct <= 70)
   drawMetric(col3, y, "RX V", formatNumber(rxV, 1), "V", false)
 
-  drawLiveStats(borderX + borderW - 150, borderY + borderH + 4, current, livePower)
+  drawLiveStats(borderX + borderW - 150, borderY + borderH - 30, current, livePower)
 
   resetColor()
 end
