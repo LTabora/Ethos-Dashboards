@@ -17,9 +17,9 @@
       otherwise it is integrated from the configured current source.
 --]]
 
-local APP_NAME = "HeliDash 0.2.10"
+local APP_NAME = "HeliDash 0.2.11"
 local APP_KEY  = "HD18"
-local VERSION  = "0.2.10-x18-frame"
+local VERSION  = "0.2.11-x18-frame"
 
 local REFRESH_HZ = 2
 local MAH_PER_AMP_SECOND = 1000 / 3600
@@ -410,11 +410,11 @@ local function drawLiveStats(x, y, current, power)
 
   setColor(colors.label)
   lcd.drawText(x, y, "Current", FONT_XS)
-  lcd.drawText(x + 72, y, "Power", FONT_XS)
+  lcd.drawText(x, y + 14, "Power", FONT_XS)
 
   setColor(colors.value)
-  lcd.drawText(x, y + 10, currentText, FONT_XS)
-  lcd.drawText(x + 72, y + 10, powerText, FONT_XS)
+  lcd.drawText(x + 68, y, currentText, FONT_XS)
+  lcd.drawText(x + 68, y + 14, powerText, FONT_XS)
 end
 
 local function create()
@@ -696,7 +696,7 @@ local function paint(widget)
   drawMetric(col2, y, "Volt %", formatNumber(voltagePct, 1), "%", false, voltagePct ~= nil and voltagePct <= 70)
   drawMetric(col3, y, "RX V", formatNumber(rxV, 1), "V", false)
 
-  drawLiveStats(borderX + borderW - 164, borderY + borderH - 42, current, livePower)
+  drawLiveStats(borderX + borderW - 136, borderY + borderH - 52, current, livePower)
 
   resetColor()
 end
