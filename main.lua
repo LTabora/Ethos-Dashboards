@@ -19,7 +19,8 @@
 
 local APP_NAME = "HDash"
 local APP_KEY  = "HDash"
-local VERSION  = "0.1.7"
+local DISPLAY_NAME = "HeliDash"
+local VERSION  = "0.1.8"
 
 local REFRESH_HZ = 2
 local MAH_PER_AMP_SECOND = 1000 / 3600
@@ -81,7 +82,7 @@ local function ensureColors()
     colors.black = lcd.RGB(0, 0, 0)
     colors.line = lcd.RGB(220, 230, 205)
     colors.title = lcd.RGB(235, 240, 220)
-    colors.label = lcd.RGB(150, 175, 120)
+    colors.label = lcd.RGB(80, 200, 80)
     colors.value = lcd.RGB(255, 255, 245)
     colors.warning = lcd.RGB(255, 210, 120)
     colors.normal = lcd.RGB(255, 255, 255)
@@ -401,6 +402,25 @@ local function drawMetric(x, y, label, value, unit, big, warn)
   lcd.drawLine(cx, cy - 6, cx, cy + 6)
 end
 
+local function drawLiveStats(x, y, current, power)
+  local currentText = formatNumber(current, 1)
+  local powerText = formatNumber(power, 0)
+
+  if currentText == nil and powerText == nil then return end
+
+  local text = ""
+  if currentText ~= nil then text = currentText .. " A" end
+  if powerText ~= nil then
+    if text ~= "" then text = text .. " / " end
+    text = text .. powerText .. " W"
+  end
+
+  setColor(colors.label)
+  lcd.drawText(x, y, "Now", FONT_S)
+  setColor(colors.value)
+  lcd.drawText(x + 42, y, text, FONT_S)
+end
+
 local function create()
   return {
     modelName = "",
@@ -639,10 +659,15 @@ local function paint(widget)
   local maxPower = round(widget.maxPower or 0, 1)
   local timer1 = getTimer1Text(widget)
 
-  local borderW = math.floor(W * 0.90)
-  local borderH = math.floor(H * 0.78)
+  local borderW = W - 24
+  local borderH = H - 44
   local borderX = math.floor((W - borderW) / 2)
-  local borderY = math.floor((H - borderH) / 2)
+  local borderY = 30
+
+  setColor(colors.title)
+  lcd.drawText(borderX, 6, DISPLAY_NAME, FONT_M)
+  setColor(colors.label)
+  lcd.drawText(borderX + 100, 9, VERSION, FONT_S)
 
   drawBox(borderX, borderY, borderW, borderH)
 
@@ -677,12 +702,7 @@ local function paint(widget)
   drawMetric(col2, y, "Voltage Percent", formatNumber(voltagePct, 1), "%", false, voltagePct ~= nil and voltagePct <= 70)
   drawMetric(col3, y, "RX Voltage", formatNumber(rxV, 1), "V", false)
 
-  if livePower ~= nil then
-    setColor(colors.label)
-    lcd.drawText(borderX + borderW - 120, borderY + borderH - 22, "Now", FONT_S)
-    setColor(colors.value)
-    lcd.drawText(borderX + borderW - 82, borderY + borderH - 22, formatNumber(livePower, 0) .. " W", FONT_S)
-  end
+  drawLiveStats(borderX + borderW - 180, borderY + borderH - 22, current, livePower)
 
   resetColor()
 end

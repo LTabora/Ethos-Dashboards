@@ -19,7 +19,8 @@
 
 local APP_NAME = "HDash18"
 local APP_KEY  = "HD18"
-local VERSION  = "0.2.4-x18-frame"
+local DISPLAY_NAME = "HeliDash"
+local VERSION  = "0.2.5-x18-frame"
 
 local REFRESH_HZ = 2
 local MAH_PER_AMP_SECOND = 1000 / 3600
@@ -81,7 +82,7 @@ local function ensureColors()
     colors.black = lcd.RGB(0, 0, 0)
     colors.line = lcd.RGB(220, 230, 205)
     colors.title = lcd.RGB(235, 240, 220)
-    colors.label = lcd.RGB(150, 175, 120)
+    colors.label = lcd.RGB(80, 200, 80)
     colors.value = lcd.RGB(255, 255, 245)
     colors.warning = lcd.RGB(255, 210, 120)
     colors.normal = lcd.RGB(255, 255, 255)
@@ -404,6 +405,25 @@ local function drawMetric(x, y, label, value, unit, big, warn)
   lcd.drawLine(cx, cy - 4, cx, cy + 4)
 end
 
+local function drawLiveStats(x, y, current, power)
+  local currentText = formatNumber(current, 1)
+  local powerText = formatNumber(power, 0)
+
+  if currentText == nil and powerText == nil then return end
+
+  local text = ""
+  if currentText ~= nil then text = currentText .. " A" end
+  if powerText ~= nil then
+    if text ~= "" then text = text .. " / " end
+    text = text .. powerText .. " W"
+  end
+
+  setColor(colors.label)
+  lcd.drawText(x, y, "Now", FONT_XS)
+  setColor(colors.value)
+  lcd.drawText(x + 32, y, text, FONT_XS)
+end
+
 local function create()
   return {
     modelName = "",
@@ -631,6 +651,7 @@ local function paint(widget)
   local rpm = sourceValue(widget.srcRpm)
   local escTemp = sourceValue(widget.srcEscTemp)
   local rxV = sourceValue(widget.srcRxVoltage)
+  local livePower = voltage and current and (voltage * current) or nil
   local voltagePct = lipoVoltagePercent(voltage, widget.cellCount)
 
   local title = getModelName(widget)
@@ -647,6 +668,11 @@ local function paint(widget)
   local borderH = 220
   local borderX = math.floor((W - borderW) / 2)
   local borderY = 34
+
+  setColor(colors.title)
+  lcd.drawText(borderX, 8, DISPLAY_NAME, FONT_S)
+  setColor(colors.label)
+  lcd.drawText(borderX + 78, 10, VERSION, FONT_XS)
 
   drawBox(borderX, borderY, borderW, borderH)
 
@@ -680,6 +706,8 @@ local function paint(widget)
   drawMetric(col1, y, "ESC Temp", formatNumber(escTemp, 0), "C", false)
   drawMetric(col2, y, "Volt %", formatNumber(voltagePct, 1), "%", false, voltagePct ~= nil and voltagePct <= 70)
   drawMetric(col3, y, "RX V", formatNumber(rxV, 1), "V", false)
+
+  drawLiveStats(borderX + borderW - 140, borderY + borderH + 7, current, livePower)
 
   resetColor()
 end
