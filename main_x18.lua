@@ -17,9 +17,9 @@
       otherwise it is integrated from the configured current source.
 --]]
 
-local APP_NAME = "HeliDash X18"
+local APP_NAME = "HDash18"
 local APP_KEY  = "HD18"
-local VERSION  = "0.2.3-x18-frame"
+local VERSION  = "0.2.4-x18-frame"
 
 local REFRESH_HZ = 2
 local MAH_PER_AMP_SECOND = 1000 / 3600
@@ -98,6 +98,17 @@ end
 local function resetColor()
   ensureColors()
   setColor(colors.normal)
+end
+
+local function getWindowSize(defaultW, defaultH)
+  if lcd and lcd.getWindowSize then
+    local ok, w, h = pcall(function() return lcd.getWindowSize() end)
+    if ok and type(w) == "number" and type(h) == "number" then
+      return w, h
+    end
+  end
+
+  return defaultW, defaultH
 end
 
 local function sourceValue(src)
@@ -477,7 +488,7 @@ local function configure(widget)
   local line
 
   line = form.addLine("Model name fallback")
-  form.addTextField(line, nil,
+  form.addTextField(line, nil, 20,
     function() return widget.modelName end,
     function(value) widget.modelName = value end)
 
@@ -602,7 +613,7 @@ end
 local function paint(widget)
   ensureColors()
 
-  local rawW, rawH = lcd.getWindowSize and lcd.getWindowSize() or 480, 320
+  local rawW, rawH = getWindowSize(480, 320)
 
   if colors.black ~= nil then
     if lcd.clear then
